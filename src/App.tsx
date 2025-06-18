@@ -1,7 +1,9 @@
+import WorksDataTablePage from "@/pages/WorksDataTable/WorksDataTablePage";
+
 function App() {
   return (
     <>
-      <span className="text-2xl">Hello World!</span>
+      <WorksDataTablePage />
     </>
   );
 }
