@@ -7,7 +7,7 @@ import { SearchBar } from "@/components/SearchBar/SearchBar";
 const getData = async (search: string): Promise<Work[]> => {
   const { data } = await axios.get("https://api.openalex.org/works", {
     params: {
-      "per-page": 20,
+      "per-page": 100,
       page: 1,
       sort: "cited_by_count:desc",
       filter: search ? `title.search:${search}` : undefined,
