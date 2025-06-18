@@ -2,16 +2,11 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface TableProps extends React.ComponentProps<"table"> {
-  scrollRef?: React.Ref<HTMLDivElement>;
-}
-
-function Table({ className, scrollRef, ...props }: TableProps) {
+function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto h-[80dvh]"
-      ref={scrollRef}
+      className="relative w-full overflow-x-auto"
     >
       <table
         data-slot="table"

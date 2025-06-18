@@ -9,9 +9,9 @@ export type Work = {
 };
 
 export const columns: ColumnDef<Work>[] = [
-  { accessorKey: "title", header: "Título" },
-  { accessorKey: "publication_year", header: "Año" },
-  { accessorKey: "cited_by_count", header: "Citaciones" },
+  { accessorKey: "title", header: "Título", size: 400 },
+  { accessorKey: "publication_year", header: "Año", size: 100 },
+  { accessorKey: "cited_by_count", header: "Citaciones", size: 100 },
   {
     header: "Autores",
     accessorFn: (row) =>
@@ -20,5 +20,6 @@ export const columns: ColumnDef<Work>[] = [
         .map((a) => a.author.display_name)
         .join(", ") || "",
     id: "authors",
+    size: 200,
   },
 ];
