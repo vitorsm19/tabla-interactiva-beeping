@@ -6,26 +6,25 @@ import { SearchBar } from "@/components/SearchBar/SearchBar";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 type GetDataParams = {
-  pageParam?: number;
+  pageParam?: string;
   queryKey: [string, string];
 };
 
-const RESULTS_PER_PAGE = 50;
-
-const getData = async ({ pageParam = 1, queryKey }: GetDataParams) => {
+const getData = async ({ pageParam = "*", queryKey }: GetDataParams) => {
   const [, search] = queryKey;
   const { data } = await axios.get("https://api.openalex.org/works", {
     params: {
-      "per-page": RESULTS_PER_PAGE,
-      page: pageParam,
+      "per-page": 100,
+      cursor: pageParam,
       sort: "cited_by_count:desc",
       filter: search ? `title.search:${search}` : undefined,
     },
   });
+
   return {
     results: data.results,
-    nextPage: pageParam + 1,
-    hasMore: data.results.length === RESULTS_PER_PAGE,
+    nextCursor: data.meta.next_cursor,
+    hasMore: !!data.meta.next_cursor,
   };
 };
 
@@ -38,9 +37,9 @@ export default function WorksDataTablePage() {
       queryKey: ["works", query],
       queryFn: getData,
       getNextPageParam: (lastPage) =>
-        lastPage.hasMore ? lastPage.nextPage : undefined,
+        lastPage.hasMore ? lastPage.nextCursor : undefined,
       enabled: !!query || query === "",
-      initialPageParam: 1,
+      initialPageParam: "*",
     });
 
   const allRows = data ? data.pages.flatMap((page) => page.results) : [];
