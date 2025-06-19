@@ -14,14 +14,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 interface DataTableProps {
   columns: ColumnDef<any, any>[];
   data: any[];
+  onEndReached?: () => void;
+  isFetchingNextPage?: boolean;
 }
 
-export function DataTable({ columns, data }: DataTableProps) {
+export function DataTable({
+  columns,
+  data,
+  onEndReached,
+  isFetchingNextPage,
+}: DataTableProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const table = useReactTable({
@@ -29,9 +36,8 @@ export function DataTable({ columns, data }: DataTableProps) {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-
   const virtualizer = useVirtualizer({
-    count: data.length,
+    count: data.length + (isFetchingNextPage ? 1 : 0),
     estimateSize: () => 35,
     getScrollElement: () => scrollRef.current,
     overscan: 5,
@@ -39,6 +45,15 @@ export function DataTable({ columns, data }: DataTableProps) {
 
   const virtualItems = virtualizer.getVirtualItems();
   const rows = table.getRowModel().rows;
+
+  // Infinite scroll trigger
+  useEffect(() => {
+    if (!virtualItems.length || !onEndReached) return;
+    const lastItem = virtualItems[virtualItems.length - 1];
+    if (lastItem.index >= data.length - 1) {
+      onEndReached();
+    }
+  }, [virtualItems, data.length, onEndReached]);
 
   return (
     <div className="rounded-md border">
@@ -77,9 +92,20 @@ export function DataTable({ columns, data }: DataTableProps) {
               >
                 <td colSpan={columns.length} className="p-0 border-none" />
               </tr>
-            )}
-
+            )}{" "}
             {virtualItems.map(({ index }) => {
+              if (index >= data.length) {
+                return (
+                  <TableRow key="loader-row">
+                    <TableCell
+                      colSpan={columns.length}
+                      className="text-center py-4"
+                    >
+                      Cargando más...
+                    </TableCell>
+                  </TableRow>
+                );
+              }
               const row = rows[index];
               return (
                 <TableRow
@@ -108,8 +134,7 @@ export function DataTable({ columns, data }: DataTableProps) {
                 </TableRow>
               );
             })}
-
-            {/* Render only visible items */}
+            {/* Spacer */}
             {virtualItems.length > 0 &&
               virtualizer.getTotalSize() -
                 virtualItems[virtualItems.length - 1].end >
@@ -125,7 +150,6 @@ export function DataTable({ columns, data }: DataTableProps) {
                   <td colSpan={columns.length} className="p-0 border-none" />
                 </tr>
               )}
-
             {/* No results fallback */}
             {virtualItems.length === 0 && (
               <TableRow>
