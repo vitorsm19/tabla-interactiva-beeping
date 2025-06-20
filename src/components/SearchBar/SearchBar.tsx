@@ -35,7 +35,9 @@ export function SearchBar({
         onChange={handleInputChange}
         placeholder={placeholder || "Buscar..."}
       />
-      <Button type="submit">Buscar</Button>
+      <Button type="submit" className="cursor-pointer">
+        Buscar
+      </Button>
     </form>
   );
 }

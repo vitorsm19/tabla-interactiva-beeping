@@ -49,7 +49,6 @@ export function DataTable({
   const virtualItems = virtualizer.getVirtualItems();
   const rows = table.getRowModel().rows;
 
-  // Infinite scroll trigger
   useEffect(() => {
     if (!virtualItems.length || !onEndReached) return;
     const lastItem = virtualItems[virtualItems.length - 1];
@@ -60,9 +59,9 @@ export function DataTable({
 
   return (
     <div className="rounded-md border">
-      <div ref={scrollRef} className="overflow-auto h-[80dvh]">
+      <div ref={scrollRef} className="overflow-auto h-[70dvh]">
         <Table>
-          <TableHeader className="sticky top-0 bg-background">
+          <TableHeader className="bg-gray-100">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
