@@ -15,12 +15,14 @@ import {
 } from "@/components/ui/table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 interface DataTableProps {
   columns: ColumnDef<any, any>[];
   data: any[];
   onEndReached?: () => void;
   isFetchingNextPage?: boolean;
+  isInitialLoading?: boolean;
 }
 
 export function DataTable({
@@ -28,6 +30,7 @@ export function DataTable({
   data,
   onEndReached,
   isFetchingNextPage,
+  isInitialLoading,
 }: DataTableProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -101,7 +104,10 @@ export function DataTable({
                       colSpan={columns.length}
                       className="text-center py-4"
                     >
-                      Cargando más...
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Cargando más...
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -150,17 +156,30 @@ export function DataTable({
                   <td colSpan={columns.length} className="p-0 border-none" />
                 </tr>
               )}
-            {/* No results fallback */}
-            {virtualItems.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No hay resultados.
-                </TableCell>
-              </TableRow>
-            )}
+            {/* Loading state or No results fallback */}
+            {virtualItems.length === 0 &&
+              (isInitialLoading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-64 text-center"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                      <p className="text-muted-foreground">Cargando datos...</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No hay resultados.
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>

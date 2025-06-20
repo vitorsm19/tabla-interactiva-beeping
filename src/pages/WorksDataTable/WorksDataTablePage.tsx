@@ -16,8 +16,8 @@ const getData = async ({ pageParam = "*", queryKey }: GetDataParams) => {
     params: {
       "per-page": 100,
       cursor: pageParam,
-      sort: `cited_by_count:${sortOrder}`,
-      filter: search ? `title.search:${search}` : undefined,
+      sort: sortOrder === "desc" ? "cited_by_count:desc" : "cited_by_count",
+      filter: search ? `default.search:${search}` : undefined,
     },
   });
 
@@ -33,7 +33,7 @@ export default function WorksDataTablePage() {
   const [query, setQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
       queryKey: ["works", query, sortOrder],
       queryFn: getData,
@@ -68,6 +68,7 @@ export default function WorksDataTablePage() {
           if (hasNextPage && !isFetchingNextPage) fetchNextPage();
         }}
         isFetchingNextPage={isFetchingNextPage}
+        isInitialLoading={isLoading && allRows.length === 0}
       />
     </div>
   );
