@@ -1,33 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
 import { columns } from "./components/WorksDataTableColumns";
 import { DataTable } from "@/components/DataTable/DataTable";
 import { SearchBar } from "@/components/SearchBar/SearchBar";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useOpenAlexInfiniteQuery } from "@/hooks/useInfiniteScroll";
 import { Table } from "lucide-react";
-
-type GetDataParams = {
-  pageParam?: string;
-  queryKey: [string, string, string];
-};
-
-const getData = async ({ pageParam = "*", queryKey }: GetDataParams) => {
-  const [, search, sortOrder] = queryKey;
-  const { data } = await axios.get("https://api.openalex.org/works", {
-    params: {
-      "per-page": 20,
-      cursor: pageParam,
-      sort: sortOrder === "desc" ? "cited_by_count:desc" : "cited_by_count",
-      filter: search ? `default.search:${search}` : undefined,
-    },
-  });
-
-  return {
-    results: data.results,
-    nextCursor: data.meta.next_cursor,
-    hasMore: !!data.meta.next_cursor,
-  };
-};
 
 export default function WorksDataTablePage() {
   const [search, setSearch] = useState("");
@@ -35,13 +11,14 @@ export default function WorksDataTablePage() {
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery({
+    useOpenAlexInfiniteQuery({
+      endpoint: "https://api.openalex.org/works",
       queryKey: ["works", query, sortOrder],
-      queryFn: getData,
-      getNextPageParam: (lastPage) =>
-        lastPage.hasMore ? lastPage.nextCursor : undefined,
+      searchParam: query ? `default.search:${query}` : undefined,
+      sortParam:
+        sortOrder === "desc" ? "cited_by_count:desc" : "cited_by_count",
       enabled: !!query || query === "",
-      initialPageParam: "*",
+      perPage: 20,
     });
 
   const allRows = data ? data.pages.flatMap((page) => page.results) : [];

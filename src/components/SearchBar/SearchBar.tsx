@@ -1,6 +1,5 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 type SearchBarProps = {
   value: string;
@@ -15,10 +14,7 @@ export function SearchBar({
   onSearch,
   placeholder,
 }: SearchBarProps) {
-  const [input, setInput] = useState(value);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
     onChange(e.target.value);
   };
 
@@ -31,7 +27,7 @@ export function SearchBar({
     <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
       <Input
         type="text"
-        value={input}
+        value={value}
         onChange={handleInputChange}
         placeholder={placeholder || "Buscar..."}
       />
