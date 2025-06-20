@@ -7,16 +7,16 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 
 type GetDataParams = {
   pageParam?: string;
-  queryKey: [string, string];
+  queryKey: [string, string, string];
 };
 
 const getData = async ({ pageParam = "*", queryKey }: GetDataParams) => {
-  const [, search] = queryKey;
+  const [, search, sortOrder] = queryKey;
   const { data } = await axios.get("https://api.openalex.org/works", {
     params: {
       "per-page": 100,
       cursor: pageParam,
-      sort: "cited_by_count:desc",
+      sort: `cited_by_count:${sortOrder}`,
       filter: search ? `title.search:${search}` : undefined,
     },
   });
@@ -31,10 +31,11 @@ const getData = async ({ pageParam = "*", queryKey }: GetDataParams) => {
 export default function WorksDataTablePage() {
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["works", query],
+      queryKey: ["works", query, sortOrder],
       queryFn: getData,
       getNextPageParam: (lastPage) =>
         lastPage.hasMore ? lastPage.nextCursor : undefined,
@@ -48,6 +49,10 @@ export default function WorksDataTablePage() {
     setQuery(search);
   };
 
+  const handleSortToggle = () => {
+    setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
+  };
+
   return (
     <div className="container mx-auto py-10">
       <SearchBar
@@ -57,7 +62,7 @@ export default function WorksDataTablePage() {
         placeholder="Buscar por título..."
       />
       <DataTable
-        columns={columns}
+        columns={columns(sortOrder, handleSortToggle)}
         data={allRows}
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) fetchNextPage();
